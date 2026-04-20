@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  root:
+    build: .
+    environment:
+      - SERVICE_NAME=root
+      - DOWNSTREAMS=grpc://service-a:8081,grpc://service-b:8081
+    ports: ["8080:8080"]
+
+  service-a:
+    build: .
+    environment:
+      - SERVICE_NAME=service-a
+      - DOWNSTREAMS=grpc://service-c:8081,grpc://service-d:8081
+
+  service-b:
+    build: .
+    environment:
+      - SERVICE_NAME=service-b
+      - DOWNSTREAMS=grpc://service-e:8081
+      - FORCE_ERROR_MAPPING=true
+      - ERROR_TYPE=notfound
+
+  service-c:
+    build: .
+    environment:
+      - SERVICE_NAME=service-c
+
+  service-d:
+    build: .
+    environment:
+      - SERVICE_NAME=service-d
+
+  service-e:
+    build: .
+    environment:
+      - SERVICE_NAME=service-e
+      - SHOULD_FAIL=true
+      - ERROR_TYPE=permissiondenied
