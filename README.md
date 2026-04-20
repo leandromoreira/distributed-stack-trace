@@ -6,6 +6,10 @@ Traditional distributed tracing flows **forward** and relies on **head-sampling*
 
 This project introduces **Backward Error Accumulation**. By intercepting and bubbling error metadata up the call chain, it creates a "Distributed Stack Trace" that captures 100% of failure context without the cost of full tracing.
 
+# Demo
+
+https://github.com/user-attachments/assets/49eedfa0-4359-48ad-8b35-05eaa292c40d
+
 # Requirements
 
 * docker
@@ -23,6 +27,7 @@ This project introduces **Backward Error Accumulation**. By intercepting and bub
 
 * make test
 * make test-success
+
 
 ---
 
