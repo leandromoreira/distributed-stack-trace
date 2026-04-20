@@ -26,7 +26,7 @@ This project introduces **Backward Error Accumulation**. By intercepting and bub
 
 ---
 
-## The "Opaque 500"
+## Why
 In microservice architectures, an error at the root often masks the true cause.
 * **The Context Gap:** Root calls return a generic `500 Internal Server Error`, losing the specifics of the downstream failure.
 * **Sampling Issues:** Distributed tracing is expensive and usually sampled (e.g., 1%). If the root call decides not to sample, the root error requires much more time and effort.
