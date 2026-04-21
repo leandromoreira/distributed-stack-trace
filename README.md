@@ -4,7 +4,36 @@ Traditional distributed tracing flows **forward** and relies on **head-sampling*
 
 > There are [efforts to bring a sampling tail](https://opentelemetry.io/blog/2022/tail-sampling/) to distributed tracing.
 
-This project introduces **Backward Error Accumulation**. By intercepting and bubbling error metadata up the call chain, it creates a "Distributed Stack Trace" that captures 100% of failure context without the cost of full tracing.
+This project creates a lab where one can arrange the services to mount any tree call pattern they need, and also to simulate errors. The two middelwares (inbound/outbound) then perform a  **backward error accumulation**; by intercepting and bubbling error metadata up the call chain, it creates a `"Distributed Stack Trace"` (in form of a tree) that captures 100% of failure context without the cost of full tracing.
+
+![microservice tree call error-fail-close](/error-fail-close.gif)
+
+The final result is an HTTP header containing the error tree, encoded as JSON.
+
+```json
+{
+  "s": "root",
+  "st": "E",
+  "c": "not-found",
+  "e": "an upstream dependency failed in service service-b",
+  "ch": [
+    {
+      "s": "service-b",
+      "st": "E",
+      "c": "not-found",
+      "e": "[DRIFT: permission-denied -> not-found] an upstream dependency failed in service service-b",
+      "ch": [
+        {
+          "s": "service-e",
+          "st": "E",
+          "c": "permission-denied",
+          "e": "an error occurred in service service-e"
+        }
+      ]
+    }
+  ]
+}
+```
 
 # Demo
 
@@ -37,4 +66,3 @@ In microservice architectures, an error at the root often masks the true cause.
 * **Sampling Issues:** Distributed tracing is expensive and usually sampled (e.g., 1%). If the root call decides not to sample, the root error requires much more time and effort.
 * **Error Drift:** Downstream errors are often remapped (e.g., a `PermissionDenied` becomes a `NotFound`), making root-cause analysis nearly impossible without checking multiple logs.
 
-![microservice tree call error-fail-close](/error-fail-close.gif)
