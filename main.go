@@ -26,7 +26,7 @@ func (h *Handler) Handle(ctx context.Context, req *transport.Request, _ transpor
 	return err
 }
 
-func (h *Handler) HandleCall(ctx context.Context, _ *transport.Request) (*transport.Response, error) {
+func (h *Handler) HandleCall(ctx context.Context, req *transport.Request) (*transport.Response, error) {
 	if os.Getenv("SHOULD_FAIL") == "true" {
 		if bypass, _ := ctx.Value(bypassKey).(bool); !bypass {
 			return nil, yarpcerrors.Newf(getErrorCode(os.Getenv("ERROR_TYPE")), "an error occurred in service %s", h.ServiceName)
@@ -54,6 +54,14 @@ func (h *Handler) HandleCall(ctx context.Context, _ *transport.Request) (*transp
 	}
 
 	if err := g.Wait(); err != nil {
+		serviceForcePass, ok := req.Headers.Get("x-force-pass-" + h.ServiceName)
+		shouldForcePass := ok && serviceForcePass == "true" || os.Getenv("FORCE_PASS") == "true"
+		if shouldForcePass {
+			res := &transport.Response{
+				Body: io.NopCloser(strings.NewReader("OK")),
+			}
+			return res, nil
+		}
 		if os.Getenv("FORCE_ERROR_MAPPING") == "true" {
 			return nil, yarpcerrors.Newf(getErrorCode(os.Getenv("ERROR_TYPE")), "an upstream dependency failed in service %s", h.ServiceName)
 		}

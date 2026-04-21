@@ -5,6 +5,7 @@ services:
     environment:
       - SERVICE_NAME=root
       - DOWNSTREAMS=grpc://service-a:8081,grpc://service-b:8081
+      # - SHOULD_PASS=true
     ports: ["8080:8080"]
 
   service-a:
