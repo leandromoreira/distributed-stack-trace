@@ -4,30 +4,32 @@ Traditional distributed tracing flows **forward** and relies on **head-sampling*
 
 > There are [efforts to bring a sampling tail](https://opentelemetry.io/blog/2022/tail-sampling/) to distributed tracing.
 
-This project creates a lab where one can arrange the services to mount any tree call pattern they need, and also to simulate errors. The two middelwares (inbound/outbound) then perform a  **backward error accumulation**; by intercepting and bubbling error metadata up the call chain, it creates a `"Distributed Stack Trace"` (in form of a tree) that captures 100% of failure context without the cost of full tracing.
+This project creates a lab where one can arrange the services to mount any tree call pattern they need, and also to simulate errors. Creating the tree-like call pattern using the docker-compose/ENV plus HTTP Headers
+
+There are two middelwares (inbound/outbound) that perform a  **backward error accumulation**; by intercepting and bubbling error metadata up the call chain, it creates a `distributed stack trace` (in form of a tree) that captures 100% of failure context without the cost of full tracing.
 
 ![microservice tree call error-fail-close](/error-fail-close.gif)
 
-The final result is an HTTP header containing the error tree, encoded as JSON.
+The final result is an HTTP header (`x-error-tree`) containing the error tree, encoded as JSON.
 
 ```json
 {
-  "s": "root",
-  "st": "E",
-  "c": "not-found",
-  "e": "an upstream dependency failed in service service-b",
-  "ch": [
+  "service": "root",
+  "status": "error",
+  "code": "not-found",
+  "error": "an upstream dependency failed in service service-b",
+  "children": [
     {
-      "s": "service-b",
-      "st": "E",
-      "c": "not-found",
-      "e": "[DRIFT: permission-denied -> not-found] an upstream dependency failed in service service-b",
-      "ch": [
+      "service": "service-b",
+      "status": "error",
+      "code": "not-found",
+      "error": "[DRIFT: permission-denied -> not-found] an upstream dependency failed in service service-b",
+      "children": [
         {
-          "s": "service-e",
-          "st": "E",
-          "c": "permission-denied",
-          "e": "an error occurred in service service-e"
+          "service": "service-e",
+          "status": "error",
+          "code": "permission-denied",
+          "error": "an error occurred in service service-e"
         }
       ]
     }
