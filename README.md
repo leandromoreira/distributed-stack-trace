@@ -68,3 +68,6 @@ In microservice architectures, an error at the root often masks the true cause.
 * **Sampling Issues:** Distributed tracing is expensive and usually sampled (e.g., 1%). If the root call decides not to sample, the root error requires much more time and effort.
 * **Error Drift:** Downstream errors are often remapped (e.g., a `PermissionDenied` becomes a `NotFound`), making root-cause analysis nearly impossible without checking multiple logs.
 
+## Challenges & TODOs
+* Changing encoding/decoder to something more performant, in terms of allocation/CPU usage (like raw proto)
+* Timeout might create split-brain
