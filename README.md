@@ -37,6 +37,13 @@ The final result is an HTTP header (`x-error-tree`) containing the error tree, e
 }
 ```
 
+## Why
+
+In microservice architectures, an error at the root often masks the true cause.
+* **The Context Gap:** Root calls return a generic `500 Internal Server Error`, losing the specifics of the downstream failure.
+* **Sampling Issues:** Distributed tracing is expensive and usually sampled (e.g., 1%). If the root call decides not to sample, the root error requires much more time and effort.
+* **Error Drift:** Downstream errors are often remapped (e.g., a `PermissionDenied` becomes a `NotFound`), making root-cause analysis nearly impossible without checking multiple logs.
+
 # Demo
 
 https://github.com/user-attachments/assets/49eedfa0-4359-48ad-8b35-05eaa292c40d
@@ -58,15 +65,9 @@ https://github.com/user-attachments/assets/49eedfa0-4359-48ad-8b35-05eaa292c40d
 
 * make test
 * make test-success
-
-
+* make test-fail-open
+  
 ---
-
-## Why
-In microservice architectures, an error at the root often masks the true cause.
-* **The Context Gap:** Root calls return a generic `500 Internal Server Error`, losing the specifics of the downstream failure.
-* **Sampling Issues:** Distributed tracing is expensive and usually sampled (e.g., 1%). If the root call decides not to sample, the root error requires much more time and effort.
-* **Error Drift:** Downstream errors are often remapped (e.g., a `PermissionDenied` becomes a `NotFound`), making root-cause analysis nearly impossible without checking multiple logs.
 
 ## Challenges & TODOs
 * Changing encoding/decoder to something more performant, in terms of allocation/CPU usage (like raw proto)
